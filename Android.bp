@@ -23,7 +23,7 @@ android_app {
 // carrier app. With no asset_module setting the upstream assets are unchanged.
 soong_config_module_type {
     name: "diamaneos_carrier_assets_defaults",
-    module_type: "android_app_defaults",
+    module_type: "java_defaults",
     config_namespace: "diamaneos_carrierconfig",
     value_variables: ["asset_module"],
     properties: ["assets"],
