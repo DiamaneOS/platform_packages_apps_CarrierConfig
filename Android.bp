@@ -5,6 +5,7 @@ package {
 android_app {
     name: "CarrierConfig",
     defaults: ["diamaneos_carrier_assets"],
+    asset_dirs: ["assets"],
     srcs: ["src/**/*.java"],
     platform_apis: true,
     certificate: "platform",
