@@ -119,13 +119,13 @@ public class DefaultCarrierConfigService extends CarrierService {
             // Load no SIM config if carrier id is not set.
             parser.setInput(inputStream, "utf-8");
             config = readConfigFromXml(parser, null, sku);
+            appendDeviceVendorConfig(parser, config, null, sku, "vendor_no_sim.xml");
 
             // Treat vendor_no_sim.xml as if it were appended to the no sim config file.
             XmlPullParser vendorInput =
                     getApplicationContext().getResources().getXml(R.xml.vendor_no_sim);
             PersistableBundle vendorConfig = readConfigFromXml(vendorInput, null, sku);
             config.putAll(vendorConfig);
-            appendDeviceVendorConfig(parser, config, null, sku, "vendor_no_sim.xml");
         } catch (IOException | XmlPullParserException e) {
             Log.e(TAG, "Failed to load config for no SIM", e);
         }
@@ -265,9 +265,9 @@ public class DefaultCarrierConfigService extends CarrierService {
         // Treat vendor.xml as if it were appended to the carrier config file we read.
         XmlPullParser vendorInput = getApplicationContext().getResources().getXml(R.xml.vendor);
         try {
+            appendDeviceVendorConfig(parser, config, id, sku, "vendor.xml");
             PersistableBundle vendorConfig = readConfigFromXml(vendorInput, id, sku);
             config.putAll(vendorConfig);
-            appendDeviceVendorConfig(parser, config, id, sku, "vendor.xml");
         }
         catch (IOException | XmlPullParserException e) {
             Log.e(TAG, e.toString());

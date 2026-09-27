@@ -8,8 +8,9 @@ second identity. Carriers without device data keep the upstream asset.
 Set the `diamaneos_carrierconfig` Soong configuration value `asset_module` to a
 filegroup name. Its paths must retain the `device-carrier-config/` prefix. That
 directory contains `carrier_config_*.xml` files and may contain
-`vendor.xml` and `vendor_no_sim.xml`. Device vendor defaults are applied last,
-in their original filtered order, just as the upstream vendor resource is.
+`vendor.xml` and `vendor_no_sim.xml`. Device vendor defaults keep their original
+filtered order. Android's vendor XML resources are applied afterward, preserving
+the normal resource-overlay mechanism for explicit device overrides.
 No runtime configuration download, additional permission or stock APK code is
 introduced. With no device module selected, upstream behavior is unchanged.
 
