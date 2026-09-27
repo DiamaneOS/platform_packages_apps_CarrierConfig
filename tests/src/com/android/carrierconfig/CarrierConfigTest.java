@@ -95,6 +95,8 @@ public class CarrierConfigTest {
         String directory = CarrierAssetIndex.DEVICE_DIRECTORY;
         String[] files = getAssets().list(directory);
         assertNotNull(files);
+        org.junit.Assume.assumeTrue("Device carrier data is not selected in this product",
+                files.length > 0);
         for (String name : files) {
             assertTrue("Unexpected device asset: " + name, name.endsWith(".xml"));
             try (InputStream stream = getAssets().open(directory + "/" + name)) {
