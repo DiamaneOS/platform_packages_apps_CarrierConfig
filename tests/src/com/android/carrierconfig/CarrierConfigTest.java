@@ -44,6 +44,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
@@ -86,6 +87,24 @@ public class CarrierConfigTest {
                 assertNotNull("got null bundle", b);
             }
         });
+    }
+
+    /** Exercise device data with the production Android parser, including no-SIM defaults. */
+    @Test
+    public void testDeviceAssetsParse() throws Exception {
+        String directory = CarrierAssetIndex.DEVICE_DIRECTORY;
+        String[] files = getAssets().list(directory);
+        assertNotNull(files);
+        for (String name : files) {
+            assertTrue("Unexpected device asset: " + name, name.endsWith(".xml"));
+            try (InputStream stream = getAssets().open(directory + "/" + name)) {
+                XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+                parser.setInput(stream, "utf-8");
+                assertNotNull(DefaultCarrierConfigService.readConfigFromXml(parser, null, ""));
+            } catch (Exception e) {
+                throw new AssertionError("Cannot parse device carrier asset " + name, e);
+            }
+        }
     }
 
     /**
