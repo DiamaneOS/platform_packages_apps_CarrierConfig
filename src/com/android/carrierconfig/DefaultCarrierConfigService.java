@@ -63,6 +63,7 @@ public class DefaultCarrierConfigService extends CarrierService {
     private static final String TAG = "DefaultCarrierConfigService";
 
     private XmlPullParserFactory mFactory;
+    private CarrierAssetIndex mCarrierAssets;
 
     public DefaultCarrierConfigService() {
         Log.d(TAG, "Service created");
@@ -118,6 +119,7 @@ public class DefaultCarrierConfigService extends CarrierService {
             // Load no SIM config if carrier id is not set.
             parser.setInput(inputStream, "utf-8");
             config = readConfigFromXml(parser, null, sku);
+            appendDeviceVendorConfig(parser, config, null, sku, "vendor_no_sim.xml");
 
             // Treat vendor_no_sim.xml as if it were appended to the no sim config file.
             XmlPullParser vendorInput =
@@ -130,6 +132,24 @@ public class DefaultCarrierConfigService extends CarrierService {
         return config;
     }
 
+    private void appendDeviceVendorConfig(XmlPullParser parser, PersistableBundle config,
+            CarrierIdentifier id, String sku, String name) throws IOException,
+            XmlPullParserException {
+        // Device data is packaged with this source-built service. No APK code,
+        // runtime download, new permission or privileged stock service is used.
+        String[] files = listAssets(CarrierAssetIndex.DEVICE_DIRECTORY);
+        if (files == null) return;
+        for (String file : files) {
+            if (file.equals(name)) {
+                try (InputStream stream = openAsset(CarrierAssetIndex.DEVICE_DIRECTORY + "/" + name)) {
+                    parser.setInput(stream, "utf-8");
+                    config.putAll(readConfigFromXml(parser, id, sku));
+                }
+                return;
+            }
+        }
+    }
+
     /**
      * List all assets.
      *
@@ -138,7 +158,17 @@ public class DefaultCarrierConfigService extends CarrierService {
      */
     @VisibleForTesting
     String[] listAssets(String path) throws IOException {
+        if (path.isEmpty()) return carrierAssets().names();
         return getApplicationContext().getAssets().list(path);
+    }
+
+    private synchronized CarrierAssetIndex carrierAssets() throws IOException {
+        if (mCarrierAssets == null) {
+            mCarrierAssets = new CarrierAssetIndex(
+                    getApplicationContext().getAssets().list(""),
+                    getApplicationContext().getAssets().list(CarrierAssetIndex.DEVICE_DIRECTORY));
+        }
+        return mCarrierAssets;
     }
 
     /**
@@ -148,7 +178,7 @@ public class DefaultCarrierConfigService extends CarrierService {
      * @return an InputStream to the asset file.
      */
     InputStream openAsset(String fileName) throws IOException {
-        return getApplicationContext().getAssets().open(fileName);
+        return getApplicationContext().getAssets().open(carrierAssets().resolve(fileName));
     }
 
     private PersistableBundle getMatchedCarrierConfig(
@@ -235,6 +265,7 @@ public class DefaultCarrierConfigService extends CarrierService {
         // Treat vendor.xml as if it were appended to the carrier config file we read.
         XmlPullParser vendorInput = getApplicationContext().getResources().getXml(R.xml.vendor);
         try {
+            appendDeviceVendorConfig(parser, config, id, sku, "vendor.xml");
             PersistableBundle vendorConfig = readConfigFromXml(vendorInput, id, sku);
             config.putAll(vendorConfig);
         }
