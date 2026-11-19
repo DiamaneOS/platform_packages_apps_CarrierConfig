@@ -23,7 +23,7 @@ specific-carrier-ID and MCC/MNC matching rules.
 
 - The DiamaneOS vendor generator authenticates the stock carrier APK and
   extracts its XML with `aapt2` into a filegroup such as
-  `fp6_stock_carrier_assets`.
+  `<device>_stock_carrier_assets`.
 - Carrier assets keep their bytes. Binary XML resources are decoded to text.
 - Numeric-only legacy filenames are left out: the stock service does not load
   them, and renaming them would activate data it ignores.
